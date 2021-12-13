@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kaniko-runner
+  namespace: kaniko
+spec:
+  parallelism: 1
+  completions: 1
+  backoffLimit: 5
+  activeDeadlineSeconds: 100
+  ttlSecondsAfterFinished: 20
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: kaniko-runner
+          image: kaniko-runner:{{VERSION}}
