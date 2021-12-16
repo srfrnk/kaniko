@@ -24,3 +24,53 @@ spec:
               add: [CHOWN, FOWNER, SETUID, SETGID, DAC_OVERRIDE]
             privileged: false
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: scratch
+              mountPath: /kaniko/data
+              subPath: kaniko
+            - name: scratch
+              mountPath: /bin
+              subPath: bin
+            - name: scratch
+              mountPath: /etc
+              subPath: etc
+            - name: scratch
+              mountPath: /home
+              subPath: home
+            - name: scratch
+              mountPath: /lib
+              subPath: lib
+            - name: scratch
+              mountPath: /media
+              subPath: media
+            - name: scratch
+              mountPath: /mnt
+              subPath: mnt
+            - name: scratch
+              mountPath: /opt
+              subPath: opt
+            - name: scratch
+              mountPath: /root
+              subPath: root
+            - name: scratch
+              mountPath: /run
+              subPath: run
+            - name: scratch
+              mountPath: /sbin
+              subPath: sbin
+            - name: scratch
+              mountPath: /srv
+              subPath: srv
+            - name: scratch
+              mountPath: /tmp
+              subPath: tmp
+            - name: scratch
+              mountPath: /usr
+              subPath: usr
+            - name: scratch
+              mountPath: /var
+              subPath: var
+      volumes:
+        - name: scratch
+          emptyDir: {}
