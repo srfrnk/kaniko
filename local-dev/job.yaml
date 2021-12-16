@@ -10,17 +10,17 @@ spec:
   activeDeadlineSeconds: 100
   ttlSecondsAfterFinished: 20
   template:
+    metadata:
+      labels:
+        app: kaniko
     spec:
       restartPolicy: Never
-      securityContext:
-        runAsNonRoot: true
       containers:
         - name: kaniko-runner
           image: kaniko-runner:{{VERSION}}
           securityContext:
-            readOnlyRootFilesystem: true
-            allowPrivilegeEscalation: false
-            runAsNonRoot: true
             capabilities:
-              drop:
-                - ALL
+              drop: [ALL]
+              add: [CHOWN, FOWNER, SETUID, SETGID, DAC_OVERRIDE]
+            privileged: false
+            allowPrivilegeEscalation: false
