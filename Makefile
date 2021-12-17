@@ -137,5 +137,5 @@ update-local-dev:
 	eval $$(minikube docker-env) && docker build --build-arg "IMAGE_VERSION=:${BUILD_NUMBER}" -t kaniko-runner:${BUILD_NUMBER} -f local-dev/kaniko-runner.Dockerfile local-dev
 
 	- kubectl delete job -n kaniko --all
-	# kubectl apply -f local-dev/network-policy.yaml
+	kubectl apply -f local-dev/network-policy.yaml
 	yq e ".spec.template.spec.containers[0].image=\"kaniko-runner:${BUILD_NUMBER}\"" local-dev/job.yaml | kubectl apply -f -
