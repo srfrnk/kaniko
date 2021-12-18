@@ -109,13 +109,17 @@ push:
 setup-local-dev:
 	@tput bold
 	@tput setaf 1
-	echo "Make sure to have run this in another terminal: 'minikube start && minikube dashboard'"
+	@echo "Make sure to have run this in another terminal: 'minikube start --cni=cilium --registry-mirror="http://localhost:32000" && minikube dashboard'"
 	@echo
 	@tput sgr0
 	minikube addons enable registry
 	minikube addons enable registry-aliases
 	kubectl apply -f local-dev/minikube-registry.yaml
-	# kubectl rollout restart -n kube-system daemonset registry-aliases-hosts-update
+
+	helm upgrade --install docker-registry-mirror docker-registry-mirror --set-string service.nodePort=32000 --repo https://t83714.github.io/docker-registry-mirror
+	echo http://$$(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}"):$$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services docker-registry-mirror)
+	kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services docker-registry-mirror
+
 	- kubectl create --save-config namespace efk
 	- kubectl create --save-config namespace kaniko
 	kubectl apply -n efk -f https://github.com/srfrnk/efk-stack-helm/releases/latest/download/efk-manifests.yaml
@@ -129,6 +133,7 @@ setup-local-dev:
 	kubectl port-forward -n efk svc/efk-kibana 5601
 
 update-local-dev:
+	# kubectl apply -f local-dev/network-policy.yaml
 	build_number=$(eval BUILD_NUMBER=$(shell od -An -N10 -i /dev/urandom | tr -d ' -' ))
 
 	curl -L -o ./local-dev/busybox.tar.xz https://github.com/docker-library/busybox/raw/50b2c75ecc4c23c4ec47f3a4a0a2fd82002a1a33/stable/uclibc/busybox.tar.xz
@@ -137,5 +142,4 @@ update-local-dev:
 	eval $$(minikube docker-env) && docker build --build-arg "IMAGE_VERSION=:${BUILD_NUMBER}" -t kaniko-runner:${BUILD_NUMBER} -f local-dev/kaniko-runner.Dockerfile local-dev
 
 	- kubectl delete job -n kaniko --all
-	kubectl apply -f local-dev/network-policy.yaml
 	yq e ".spec.template.spec.containers[0].image=\"kaniko-runner:${BUILD_NUMBER}\"" local-dev/job.yaml | kubectl apply -f -

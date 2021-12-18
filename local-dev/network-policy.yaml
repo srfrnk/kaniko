@@ -4,7 +4,17 @@ metadata:
   name: default-deny-all
   namespace: kaniko
 spec:
-  podSelector: {}
-  policyTypes:
-    - Ingress
-    - Egress
+  podSelector:
+    matchLabels:
+      app: kaniko
+  ingress: []
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              kubernetes.io/minikube-addons: registry
+          ports:
+            - port: 80
